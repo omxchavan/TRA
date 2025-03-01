@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { YoutubeTranscript } from 'youtube-transcript';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import axios from 'axios';
+import http from 'http';
 import https from 'https';
 
 const geminiKey = process.env.GEMINI_KEY as string;
@@ -17,13 +18,11 @@ interface TranscriptEntry {
 
 // Configure axios with proxy if available
 const axiosInstance = axios.create({
-  httpsAgent: proxyUrl ? new https.Agent({
-    proxy: {
-      host: new URL(proxyUrl).hostname,
-      port: parseInt(new URL(proxyUrl).port),
-      protocol: new URL(proxyUrl).protocol.replace(':', '')
-    }
-  }) : undefined
+  proxy: proxyUrl ? {
+    protocol: new URL(proxyUrl).protocol.replace(':', ''),
+    host: new URL(proxyUrl).hostname,
+    port: parseInt(new URL(proxyUrl).port)
+  } : undefined
 });
 
 // Custom YouTube transcript fetcher with proxy support
@@ -61,21 +60,20 @@ async function fetchTranscriptWithProxy(videoId: string): Promise<TranscriptEntr
 // Helper function to parse YouTube transcript XML
 function parseYouTubeTranscriptXml(xmlData: string): TranscriptEntry[] {
   const entries: TranscriptEntry[] = [];
-  
-  // Basic regex to extract text from simplified XML format
   const regex = /<text start="([\d.]+)" dur="([\d.]+)">(.*?)<\/text>/g;
   let match: RegExpExecArray | null;
-  
+
   while ((match = regex.exec(xmlData)) !== null) {
     entries.push({
-      offset: parseFloat(match[1]) * 1000, // Convert to milliseconds
-      duration: parseFloat(match[2]) * 1000, // Convert to milliseconds
-      text: decodeURIComponent(match[3].replace(/\+/g, ' '))
+      offset: parseFloat(match?.[1] ?? "0") * 1000, // Convert to milliseconds
+      duration: parseFloat(match?.[2] ?? "0") * 1000, // Convert to milliseconds
+      text: decodeURIComponent((match?.[3] ?? "").replace(/\+/g, ' '))
     });
   }
-  
+
   return entries;
 }
+
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
