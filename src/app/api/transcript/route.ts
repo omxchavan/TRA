@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { YoutubeTranscript } from 'youtube-transcript';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import axios from 'axios';
-import http from 'http';
-import https from 'https';
+
 
 const geminiKey = process.env.GEMINI_KEY as string;
 const proxyUrl = process.env.HTTP_PROXY || process.env.PROXY_URL;
