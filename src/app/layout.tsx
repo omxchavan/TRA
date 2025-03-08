@@ -6,9 +6,9 @@ import { type Metadata } from "next";
 import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
-  title: "pdl v2",
-  description: "Project for pdl assignment",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  title: "youtube_transcript",
+  description: "jsut for fun",
+  icons: [{ rel: "icon", url: "" }],
 };
 
 export default function RootLayout({
